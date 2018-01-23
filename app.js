@@ -12,28 +12,30 @@
         var controller = this;
 
         var promise = MenuSearchService.getMatchedMenuItems();
+        var list = [];
         controller.searchTerm = '';
         controller.found = [];
 
         controller.loadItems = function () {
             promise.then(function (result) {
-                controller.found = result.data['menu_items'];
+                list = result.data['menu_items'];
             });
         };
 
         controller.loadItems();
 
-        $scope.$watch('controller.searchTerm', function() {
-            if (controller.searchTerm.length === 0) {
-                controller.loadItems();
-            }
-        });
-
         controller.narrowIt = function () {
-            controller.found = controller.found.filter(function(item) {
+            controller.found = list.filter(function(item) {
                 return item.description.indexOf(controller.searchTerm) > -1;
             });
         };
+
+
+        $scope.$watch('controller.searchTerm', function() {
+            if (controller.searchTerm.length === 0) {
+                controller.found = [];
+            }
+        });
 
         controller.removeFound = function (index) {
             controller.found.splice(index, 1);
