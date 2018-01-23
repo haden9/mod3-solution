@@ -7,27 +7,37 @@
         .directive('foundItems', FoundItemsDirective)
         .constant('ApiBasePath', 'https://davids-restaurant.herokuapp.com');
 
-    NarrowItDownController.$inject = ['MenuSearchService'];
-    function NarrowItDownController(MenuSearchService) {
+    NarrowItDownController.$inject = ['MenuSearchService', '$scope'];
+    function NarrowItDownController(MenuSearchService, $scope) {
         var controller = this;
 
         var promise = MenuSearchService.getMatchedMenuItems();
         controller.searchTerm = '';
         controller.found = [];
 
-        promise.then(function (result) {
-            controller.found = result.data['menu_items'];
+        controller.loadItems = function () {
+            promise.then(function (result) {
+                controller.found = result.data['menu_items'];
+            });
+        };
+
+        controller.loadItems();
+
+        $scope.$watch('controller.searchTerm', function() {
+            if (controller.searchTerm.length === 0) {
+                controller.loadItems();
+            }
         });
 
         controller.narrowIt = function () {
             controller.found = controller.found.filter(function(item) {
                 return item.description.indexOf(controller.searchTerm) > -1;
             });
-        }
+        };
 
         controller.removeFound = function (index) {
             controller.found.splice(index, 1);
-        }
+        };
     }
 
     MenuSearchService.$inject = ['$http', 'ApiBasePath']
